@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Segurança: Zoho x Google x M365</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page dashboard designed for CISOs. It uses a top navigation to jump to thematic security sections (IAM, Data Protection, etc.). The core is a high-level radar chart for quick comparison, followed by detailed three-column grid layouts for deep-dives into each platform's features. This structure allows both a quick overview and in-depth analysis, catering to a CISO's need for both strategic and tactical information. -->
+    <!-- Visualization & Content Choices: Report Info: Security features of 3 suites -> Goal: High-level comparison -> Viz: Radar Chart -> Interaction: Hover for details -> Justification: Shows multi-dimensional strengths/weaknesses at a glance -> Library: Chart.js. Report Info: Specific security features -> Goal: Detailed comparison -> Viz: 3-column card layout -> Interaction: N/A (static display) -> Justification: Clear, scannable side-by-side comparison of feature sets -> Library/Method: HTML/Tailwind Grid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D3B30;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            color: #A37E2C;
+            border-bottom: 2px solid #A37E2C;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAE8E1;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-gray-200">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl font-bold text-gray-800">Análise de Segurança para CISO</h1>
+                <div class="hidden sm:block">
+                    <div id="nav-links" class="flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Visão Geral</a>
+                        <a href="#iam" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">IAM</a>
+                        <a href="#data-protection" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Proteção de Dados</a>
+                        <a href="#threat-protection" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Ameaças</a>
+                        <a href="#governance" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Governança</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <section id="overview" class="mb-16">
+            <h2 class="text-3xl font-bold tracking-tight text-gray-900 mb-4 text-center">Comparativo Estratégico de Suítes de Produtividade</h2>
+            <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto text-center">
+                Como CISO, a escolha de uma suíte de produtividade transcende a funcionalidade. É uma decisão de segurança fundamental que impacta o risco, a conformidade e a resiliência da organização. Esta análise foca nos pilares de segurança da informação para comparar Zoho One, Google Workspace e Microsoft 365, fornecendo uma base clara para a tomada de decisão.
+            </p>
+            <div class="mt-10">
+                <div class="chart-container">
+                    <canvas id="securityRadarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <div id="comparison-sections">
+        </div>
+
+    </main>
+    <footer class="bg-white mt-16 border-t border-gray-200">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+            <p>&copy; 2025 Análise de Segurança para CISO. Conteúdo gerado para fins de avaliação estratégica.</p>
+        </div>
+    </footer>
+
+    <script>
+        const securityData = {
+            overview: {
+                labels: ["IAM", "Proteção de Dados", "Proteção Contra Ameaças", "Governança & Conformidade", "Gestão de Endpoints"],
+                zoho: {
+                    label: 'Zoho One',
+                    scores: [3, 3, 2, 3, 3],
+                    borderColor: 'rgb(250, 83, 70)',
+                    backgroundColor: 'rgba(250, 83, 70, 0.2)',
+                },
+                google: {
+                    label: 'Google Workspace',
+                    scores: [4, 4, 4, 4, 4],
+                    borderColor: 'rgb(52, 168, 83)',
+                    backgroundColor: 'rgba(52, 168, 83, 0.2)',
+                },
+                m365: {
+                    label: 'Microsoft 365',
+                    scores: [5, 5, 5, 5, 5],
+                    borderColor: 'rgb(66, 133, 244)',
+                    backgroundColor: 'rgba(66, 133, 244, 0.2)',
+                }
+            },
+            sections: [
+                {
+                    id: 'iam',
+                    title: 'Identidade e Gestão de Acesso (IAM)',
+                    description: 'A base de qualquer estratégia de segurança Zero Trust. O IAM garante que apenas usuários autorizados acessem os recursos apropriados, no momento certo e pelo motivo certo. Avaliamos a robustez dos controles de autenticação, autorização e provisionamento.',
+                    platforms: {
+                        zoho: {
+                            title: 'Zoho One',
+                            rating: 3,
+                            features: [
+                                { name: 'Autenticação Multifator (MFA)', description: 'Suporte para TOTP, notificações push (OneAuth), YubiKey. Sólido para a maioria dos casos de uso.' },
+                                { name: 'Single Sign-On (SSO)', description: 'Atua como Provedor de Identidade (IdP) e Provedor de Serviço (SP) via SAML e OpenID.' },
+                                { name: 'Políticas de Senha', description: 'Controles granulares de complexidade, expiração e histórico.' },
+                                { name: 'Acesso Condicional', description: 'Básico, baseado principalmente em restrições de IP. Menos granular que os concorrentes.' },
+                            ]
+                        },
+                        google: {
+                            title: 'Google Workspace',
+                            rating: 4,
+                            features: [
+                                { name: 'Autenticação Multifator (MFA)', description: 'Amplo suporte, incluindo Google Prompt, chaves de segurança FIDO/Titan e TOTP.' },
+                                { name: 'Single Sign-On (SSO)', description: 'Configuração robusta como IdP e SP para milhares de apps pré-integrados.' },
+                                { name: 'Acesso Context-Aware', description: 'Políticas de acesso condicional baseadas em usuário, localização, status do dispositivo e IP.' },
+                                { name: 'BeyondCorp Enterprise', description: 'Implementação avançada de Zero Trust, movendo o acesso para longe da VPN tradicional (requer plano superior).' },
+                            ]
+                        },
+                        m365: {
+                            title: 'Microsoft 365',
+                            rating: 5,
+                            features: [
+                                { name: 'Azure Active Directory (Entra ID)', description: 'Líder de mercado em IAM. Suporte extensivo a MFA, incluindo FIDO2 passwordless.' },
+                                { name: 'Acesso Condicional', description: 'Extremamente granular, com políticas baseadas em risco em tempo real, dispositivo, aplicação e localização.' },
+                                { name: 'Identity Protection', description: 'Detecção de risco de identidade baseada em IA para automatizar a remediação de contas comprometidas.' },
+                                { name: 'Privileged Identity Management (PIM)', description: 'Controles just-in-time para acesso a funções administrativas, minimizando o risco.' },
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: 'data-protection',
+                    title: 'Proteção de Dados e Prevenção de Perdas (DLP)',
+                    description: 'Proteger os dados onde quer que eles residam é crucial. Analisamos os recursos de criptografia, classificação de dados e as políticas de DLP que previnem a exfiltração de informações sensíveis, tanto acidental quanto maliciosa.',
+                    platforms: {
+                        zoho: {
+                            title: 'Zoho One',
+                            rating: 3,
+                            features: [
+                                { name: 'Criptografia em Repouso e Trânsito', description: 'Padrão da indústria (AES-256 e TLS). Criptografia de e-mail via S/MIME e Zoho\'s SecurePass.' },
+                                { name: 'Políticas de DLP', description: 'Disponível no e-mail (Mail) e no desktop (Endpoint Central). Regras baseadas em conteúdo predefinido e personalizado.' },
+                                { name: 'Retenção de E-mail', description: 'Políticas de retenção e eDiscovery disponíveis no Zoho Mail.' },
+                                { name: 'Gestão de Direitos', description: 'Controles de permissão granulares em nível de aplicação (ex: WorkDrive), mas sem uma estrutura unificada de Information Rights Management (IRM).' },
+                            ]
+                        },
+                        google: {
+                            title: 'Google Workspace',
+                            rating: 4,
+                            features: [
+                                { name: 'Criptografia', description: 'Criptografia em repouso e trânsito por padrão. Client-side encryption (CSE) disponível para controle total das chaves.' },
+                                { name: 'Prevenção de Perda de Dados (DLP)', description: 'DLP para Drive, Gmail e Chat com detectores de conteúdo predefinidos e personalizados. Regras baseadas em OCR para imagens.' },
+                                { name: 'Google Vault', description: 'eDiscovery e retenção para todos os dados do Workspace, incluindo buscas complexas e legal holds.' },
+                                { name: 'Rótulos de Confidencialidade', description: 'Classificação de dados manual e automatizada para arquivos no Drive (em desenvolvimento, menos maduro que M365).' },
+                            ]
+                        },
+                        m365: {
+                            title: 'Microsoft 365',
+                            rating: 5,
+                            features: [
+                                { name: 'Microsoft Purview Information Protection', description: 'Estrutura unificada para classificação, rotulagem e proteção de dados (criptografia e restrições de acesso).' },
+                                { name: 'Prevenção de Perda de Dados (DLP)', description: 'DLP unificado em endpoints, apps, e serviços na nuvem (SharePoint, Exchange, Teams). Altamente customizável.' },
+                                { name: 'eDiscovery & Auditoria', description: 'Purview eDiscovery (Premium) oferece um fluxo de trabalho de ponta a ponta para investigações, incluindo análise avançada.' },
+                                { name: 'Dupla Criptografia de Chave (DKE)', description: 'Para cenários de altíssima sensibilidade, onde a Microsoft não tem acesso às chaves de criptografia.' },
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: 'threat-protection',
+                    title: 'Proteção Avançada Contra Ameaças',
+                    description: 'As defesas tradicionais são insuficientes contra as ameaças modernas. Esta seção avalia as capacidades de detecção e resposta a phishing, malware, ransomware e ataques direcionados, incluindo sandboxing e análise de comportamento.',
+                    platforms: {
+                        zoho: {
+                            title: 'Zoho One',
+                            rating: 2,
+                            features: [
+                                { name: 'Proteção de E-mail', description: 'Filtros anti-spam e anti-vírus. SPF, DKIM, DMARC. Proteção básica, sem sandboxing de anexos ou URL.' },
+                                { name: 'Segurança de Endpoint', description: 'Através do Endpoint Central (MDM), oferece patch management, controle de aplicações e antivírus básico.' },
+                                { name: 'SIEM', description: 'Integração com o Zoho Log360 (produto separado, mas do mesmo ecossistema) para análise de segurança.' },
+                                { name: 'Visibilidade de Ameaças', description: 'Limitada nativamente dentro do One. Depende de integrações ou produtos adicionais para uma postura de XDR.' },
+                            ]
+                        },
+                        google: {
+                            title: 'Google Workspace',
+                            rating: 4,
+                            features: [
+                                { name: 'Proteção Avançada contra Phishing e Malware', description: 'Machine learning robusto para detecção de ameaças no Gmail. Detonação de anexos em sandbox de segurança.' },
+                                { name: 'Proteção de URL', description: 'Verificação de tempo de clique para URLs em e-mails e chat.' },
+                                { name: 'Centro de Alertas e Investigação', description: 'Painel centralizado para alertas de segurança e ferramenta para investigações aprofundadas sobre eventos.' },
+                                { name: 'Integração com Chronicle', description: 'Pode ser integrado ao Google Chronicle (plataforma SIEM/SOAR) para análise de telemetria em escala.' },
+                            ]
+                        },
+                        m365: {
+                            title: 'Microsoft 365',
+                            rating: 5,
+                            features: [
+                                { name: 'Microsoft Defender for Office 365', description: 'Proteção de ponta para e-mail e colaboração. Safe Attachments (sandbox), Safe Links (URL rewrite) e anti-phishing avançado.' },
+                                { name: 'Microsoft Defender for Endpoint', description: 'Plataforma EDR/XDR líder de mercado para proteção de dispositivos, com Threat & Vulnerability Management.' },
+                                { name: 'Microsoft Sentinel', description: 'SIEM e SOAR nativo da nuvem, profundamente integrado com todo o ecossistema Microsoft para visibilidade e automação de ponta a ponta.' },
+                                { name: 'Simulação de Ataques', description: 'Ferramenta integrada para treinar usuários contra phishing e outras ameaças, com relatórios detalhados.' },
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: 'governance',
+                    title: 'Governança, Risco e Conformidade (GRC)',
+                    description: 'Manter a conformidade com regulamentações como GDPR, LGPD e HIPAA é imperativo. Avaliamos as ferramentas de auditoria, os painéis de conformidade e as certificações que cada plataforma oferece para simplificar e demonstrar a aderência às normas.',
+                    platforms: {
+                        zoho: {
+                            title: 'Zoho One',
+                            rating: 3,
+                            features: [
+                                { name: 'Trilhas de Auditoria', description: 'Logs de auditoria detalhados disponíveis na maioria das aplicações críticas.' },
+                                { name: 'Certificações', description: 'Possui certificações importantes como ISO 27001, SOC 2 Tipo II, e conformidade com GDPR e HIPAA.' },
+                                { name: 'Residência de Dados', description: 'Permite escolher a região do data center (ex: EUA, UE, Índia) no momento da inscrição.' },
+                                { name: 'Painel de Conformidade', description: 'Menos centralizado que os concorrentes. A gestão de conformidade é distribuída entre os painéis de administração das apps.' },
+                            ]
+                        },
+                        google: {
+                            title: 'Google Workspace',
+                            rating: 4,
+                            features: [
+                                { name: 'Painel de Segurança', description: 'Oferece uma visão geral da postura de segurança, insights e recomendações.' },
+                                { name: 'Certificações e Conformidade', description: 'Ampla gama de certificações globais e regionais. Ferramentas para ajudar na conformidade com GDPR, HIPAA, etc.' },
+                                { name: 'Regiões de Dados', description: 'Controles granulares para escolher onde os dados cobertos de usuários específicos são armazenados em repouso.' },
+                                { name: 'Transparência de Acesso', description: 'Logs detalhados de quando a equipe do Google acessa dados de clientes (geralmente para suporte).' },
+                            ]
+                        },
+                        m365: {
+                            title: 'Microsoft 365',
+                            rating: 5,
+                            features: [
+                                { name: 'Microsoft Purview Compliance Portal', description: 'Hub centralizado para gerenciar a conformidade. Inclui o Compliance Manager que mapeia controles para regulamentações.' },
+                                { name: 'Certificações Extensivas', description: 'O portfólio de conformidade mais abrangente do mercado, cobrindo dezenas de padrões globais e setoriais.' },
+                                { name: 'Auditoria Avançada', description: 'Logs de auditoria forense de longa duração e insights sobre atividades de alto risco.' },
+                                { name: 'Data Residency e Multi-Geo', description: 'Opções avançadas para residência de dados por usuário ou por site do SharePoint, para atender a requisitos de soberania de dados.' },
+                            ]
+                        }
+                    }
+                }
+            ]
+        };
+
+        function renderRating(rating) {
+            let stars = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < rating) {
+                    stars += `<span class="text-amber-500">&#9733;</span>`;
+                } else {
+                    stars += `<span class="text-gray-300">&#9733;</span>`;
+                }
+            }
+            return stars;
+        }
+
+        function createComparisonSection(sectionData) {
+            const sectionEl = document.createElement('section');
+            sectionEl.id = sectionData.id;
+            sectionEl.className = 'mb-16';
+
+            let content = `
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">${sectionData.title}</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">${sectionData.description}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            `;
+
+            for (const platformKey in sectionData.platforms) {
+                const platform = sectionData.platforms[platformKey];
+                content += `
+                    <div class="card rounded-xl shadow-lg p-6 flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800">${platform.title}</h3>
+                            <div class="text-lg">${renderRating(platform.rating)}</div>
+                        </div>
+                        <ul class="space-y-4 text-gray-600 flex-grow">
+                `;
+                platform.features.forEach(feature => {
+                    content += `
+                        <li class="flex items-start">
+                            <span class="mr-3 text-emerald-500 mt-1">&#10003;</span>
+                            <div>
+                                <strong class="font-medium text-gray-700">${feature.name}:</strong> ${feature.description}
+                            </div>
+                        </li>
+                    `;
+                });
+                content += `</ul></div>`;
+            }
+            content += `</div>`;
+            sectionEl.innerHTML = content;
+            return sectionEl;
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('securityRadarChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: securityData.overview.labels,
+                    datasets: [
+                        {
+                            label: securityData.overview.zoho.label,
+                            data: securityData.overview.zoho.scores,
+                            borderColor: securityData.overview.zoho.borderColor,
+                            backgroundColor: securityData.overview.zoho.backgroundColor,
+                            borderWidth: 2,
+                            pointBackgroundColor: securityData.overview.zoho.borderColor,
+                            pointRadius: 4,
+                        },
+                        {
+                            label: securityData.overview.google.label,
+                            data: securityData.overview.google.scores,
+                            borderColor: securityData.overview.google.borderColor,
+                            backgroundColor: securityData.overview.google.backgroundColor,
+                            borderWidth: 2,
+                            pointBackgroundColor: securityData.overview.google.borderColor,
+                            pointRadius: 4,
+                        },
+                        {
+                            label: securityData.overview.m365.label,
+                            data: securityData.overview.m365.scores,
+                            borderColor: securityData.overview.m365.borderColor,
+                            backgroundColor: securityData.overview.m365.backgroundColor,
+                            borderWidth: 2,
+                            pointBackgroundColor: securityData.overview.m365.borderColor,
+                            pointRadius: 4,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 13,
+                                    weight: '500'
+                                },
+                                color: '#3D3B30'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                max: 5,
+                                stepSize: 1,
+                                backdropColor: 'rgba(255, 255, 255, 0.75)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.r !== null) {
+                                        label += context.parsed.r + ' / 5';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const comparisonContainer = document.getElementById('comparison-sections');
+            securityData.sections.forEach(section => {
+                const sectionNode = createComparisonSection(section);
+                comparisonContainer.appendChild(sectionNode);
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-80px 0px -50% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+             if (navLinks.length > 0) {
+                navLinks[0].classList.add('active');
+            }
+
+        });
+    </script>
+
+</body>
+</html>
