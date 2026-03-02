@@ -3,450 +3,477 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Analysis: Zoho vs. Google vs. M365</title>
+    <title>Information Security Maturity Dashboard | Korn Translations</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Harmony -->
-    <!-- Application Structure Plan: A single-page dashboard designed for CISOs. It uses a top navigation to jump to thematic security sections (IAM, Data Protection, etc.). The core is a high-level radar chart for a quick comparison, followed by detailed three-column grid layouts for deep-dives into each platform's features. This structure allows both a quick overview and in-depth analysis, catering to a CISO's need for both strategic and tactical information. -->
-    <!-- Visualization & Content Choices: Report Info: Security features of 3 suites -> Goal: High-level comparison -> Viz: Radar Chart -> Interaction: Hover for details -> Justification: Shows multi-dimensional strengths/weaknesses at a glance -> Library: Chart.js. Report Info: Specific security features -> Goal: Detailed comparison -> Viz: 3-column card layout -> Interaction: N/A (static display) -> Justification: Clear, scannable side-by-side comparison of feature sets -> Library/Method: HTML/Tailwind Grid. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F8F7F4;
-            color: #3D3B30;
-        }
-        .nav-link {
-            transition: all 0.3s ease;
-        }
-        .nav-link.active {
-            color: #A37E2C;
-            border-bottom: 2px solid #A37E2C;
-        }
-        .card {
-            background-color: #FFFFFF;
-            border: 1px solid #EAE8E1;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
         .chart-container {
             position: relative;
             width: 100%;
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
-            height: 350px;
-            max-height: 50vh;
+            height: 320px;
+            max-height: 400px;
         }
+        
         @media (min-width: 768px) {
             .chart-container {
-                height: 500px;
+                height: 380px;
             }
         }
+
+        .nav-item.active {
+            background-color: #1e40af; /* blue-800 */
+            border-left: 4px solid #60a5fa; /* blue-400 */
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="antialiased">
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-gray-200">
-        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <h1 class="text-xl font-bold text-gray-800">CISO Security Analysis</h1>
-                <div class="hidden sm:block">
-                    <div id="nav-links" class="flex items-baseline space-x-4">
-                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Overview</a>
-                        <a href="#iam" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">IAM</a>
-                        <a href="#data-protection" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Data Protection</a>
-                        <a href="#threat-protection" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Threat Protection</a>
-                        <a href="#governance" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Governance</a>
+<body class="bg-slate-50 text-slate-800 flex flex-col md:flex-row min-h-screen">
+
+    <!-- Sidebar Navigation -->
+    <nav class="w-full md:w-64 bg-slate-900 text-white flex flex-col sticky top-0 h-auto md:h-screen z-50">
+        <div class="p-6 border-b border-slate-700">
+            <h1 class="text-xl font-bold tracking-wider mb-1">&#128274; SEC<span class="text-blue-400">BOARD</span></h1>
+            <p class="text-xs text-slate-400 uppercase tracking-widest">Korn Translations</p>
+        </div>
+        <div class="flex-grow overflow-y-auto">
+            <ul class="flex md:flex-col text-sm md:text-base py-2 md:py-4">
+                <li><a href="#overview" class="nav-item block px-6 py-3 hover:bg-slate-800 transition-colors active">&#127968; Overview</a></li>
+                <li><a href="#strategic" class="nav-item block px-6 py-3 hover:bg-slate-800 transition-colors">&#128200; Strategic Level</a></li>
+                <li><a href="#tactical" class="nav-item block px-6 py-3 hover:bg-slate-800 transition-colors">&#9873; Tactical Level</a></li>
+                <li><a href="#operational" class="nav-item block px-6 py-3 hover:bg-slate-800 transition-colors">&#9881; Operational Level</a></li>
+                <li><a href="#risks" class="nav-item block px-6 py-3 hover:bg-slate-800 transition-colors">&#9888; Risk Matrix</a></li>
+                <li><a href="#action-plan" class="nav-item block px-6 py-3 hover:bg-slate-800 transition-colors">&#128640; 2025 Roadmap</a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t border-slate-700 text-xs text-slate-500">
+            Based on ISO/IEC 27001:2022
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full overflow-x-hidden">
+        
+        <header class="bg-white shadow-sm px-8 py-6 sticky top-0 z-40 bg-opacity-95 backdrop-blur">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Security & Privacy Maturity Dashboard</h2>
+                    <p class="text-sm text-slate-500 mt-1">Metric Governance & Risk Posture | Status: <span class="font-semibold text-blue-600">Revision V7.3</span></p>
+                </div>
+                <div class="hidden sm:block text-right">
+                    <p class="text-sm font-semibold">Executive Board</p>
+                    <p class="text-xs text-slate-400" id="current-date"></p>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-6xl mx-auto p-4 sm:p-8 space-y-12 pb-24">
+
+            <!-- Section 0: Overview -->
+            <section id="overview" class="scroll-mt-24">
+                <div class="glass-card rounded-xl p-6 md:p-8 border-l-4 border-blue-600 bg-white">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">&#128220; Report Context</h3>
+                    <p class="text-slate-600 leading-relaxed mb-4">
+                        This interactive dashboard establishes the governance of Key Performance Indicators (KPIs) for Korn Translations, part of the Idlewild Burg group. The primary goal is to provide the Senior Leadership Team with real-time visibility into the organization's risk posture and control effectiveness. All indicators are aligned with industry best practices, global privacy guidelines (GDPR/LGPD), and the rigorous requirements of the <strong>ISO/IEC 27001:2022</strong> standard.
+                    </p>
+                    <p class="text-slate-600 leading-relaxed">
+                        Explore the sections below to visualize consolidated maturity scores, tactical incident response capabilities, and our journey toward a <em>Zero Trust</em> architecture for 2025.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 1: Strategic -->
+            <section id="strategic" class="scroll-mt-24">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 inline-block">&#128200; 1. Strategic Level (Board View)</h3>
+                </div>
+                <p class="text-slate-600 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    The Strategic view translates complex technical data into a single business metric: the <strong>Information Security Maturity Index (ISMI)</strong>. This score summarizes the organization's cybersecurity health, facilitating executive decision-making and investment allocation. Scores below 40% indicate a "Reactive" posture, while those above 80% reflect "Optimized" processes.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-card rounded-xl p-6 bg-white flex flex-col items-center justify-center">
+                        <h4 class="text-lg font-semibold text-slate-700 mb-2">Current ISMI Score</h4>
+                        <p class="text-sm text-slate-500 mb-4 text-center">Calculated from the weighted average of Compliance, Risk, and Protection.</p>
+                        <div class="chart-container w-full max-w-sm h-64">
+                            <canvas id="icmsChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <span class="text-3xl font-bold text-blue-600" id="icms-value">76%</span>
+                            <span class="block text-sm font-medium text-slate-500 uppercase tracking-wide">Maturity: Managed / Defined</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-6 bg-white">
+                        <h4 class="text-lg font-semibold text-slate-700 mb-6">ISMI Components</h4>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="font-medium text-slate-700 flex items-center gap-2">&#128203; Pilar C: Compliance (30%)</span>
+                                    <span class="text-sm font-semibold text-slate-600">85%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3">
+                                    <div class="bg-blue-500 h-3 rounded-full transition-all duration-1000" style="width: 85%"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Adherence to policies and ISO 27001 standards.</p>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="font-medium text-slate-700 flex items-center gap-2">&#9878; Pilar R: Risk (40%)</span>
+                                    <span class="text-sm font-semibold text-slate-600">70%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3">
+                                    <div class="bg-yellow-500 h-3 rounded-full transition-all duration-1000" style="width: 70%"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Effectiveness of critical risk mitigation plans.</p>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="font-medium text-slate-700 flex items-center gap-2">&#128187; Pilar P: Protection (30%)</span>
+                                    <span class="text-sm font-semibold text-slate-600">75%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3">
+                                    <div class="bg-green-500 h-3 rounded-full transition-all duration-1000" style="width: 75%"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Performance of technical controls (EDR, Firewalls, Stance-Bay).</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 bg-slate-100 p-4 rounded text-sm font-mono text-slate-600">
+                            ISMI = ((C &times; 0.3) + (R &times; 0.4) + (P &times; 0.3)) / 100
+                        </div>
                     </div>
                 </div>
-            </div>
-        </nav>
-    </header>
+            </section>
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <section id="overview" class="mb-16">
-            <h2 class="text-3xl font-bold tracking-tight text-gray-900 mb-4 text-center">Strategic Comparison of Productivity Suites</h2>
-            <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto text-center">
-                As a CISO, choosing a productivity suite transcends functionality. It's a fundamental security decision that impacts an organization's risk, compliance, and resilience. This analysis focuses on the pillars of information security to compare Zoho One, Google Workspace, and Microsoft 365, providing a clear basis for decision-making.
-            </p>
-            <div class="mt-10">
-                <div class="chart-container">
-                    <canvas id="securityRadarChart"></canvas>
+            <!-- Section 2: Tactical -->
+            <section id="tactical" class="scroll-mt-24">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 inline-block">&#9873; 2. Tactical Level (Management View)</h3>
                 </div>
-            </div>
-        </section>
+                <p class="text-slate-600 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    Tactical indicators measure process efficiency and organizational resilience. Here we evaluate the human factor — including training engagement (Wizer) and the team's ability to spot threats (phishing) — as well as IT's agility in containing confirmed security incidents.
+                </p>
 
-        <div id="comparison-sections">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="glass-card rounded-xl p-6 border-t-4 border-blue-500 bg-white group">
+                        <h4 class="text-slate-500 text-sm font-semibold uppercase tracking-wide">MTTD</h4>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">1.2 <span class="text-base font-normal text-slate-500">Hours</span></p>
+                        <p class="text-xs text-green-600 font-semibold mt-2">&#10004; Within Target (&lt; 4h)</p>
+                        <p class="text-xs text-slate-500 mt-3 italic">Mean Time to Detect via Stance-Bay monitoring.</p>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-6 border-t-4 border-yellow-500 bg-white">
+                        <h4 class="text-slate-500 text-sm font-semibold uppercase tracking-wide">MTTR</h4>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">3.5 <span class="text-base font-normal text-slate-500">Hours</span></p>
+                        <p class="text-xs text-green-600 font-semibold mt-2">&#10004; Within Target (&lt; 4h)</p>
+                        <p class="text-xs text-slate-500 mt-3 italic">Mean Time to Respond/Remediate alerts.</p>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-6 border-t-4 border-slate-700 bg-white">
+                        <h4 class="text-slate-500 text-sm font-semibold uppercase tracking-wide">Human Sensor Index</h4>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">42%</p>
+                        <p class="text-xs text-green-600 font-semibold mt-2">&#10004; Target &gt; 30%</p>
+                        <p class="text-xs text-slate-500 mt-3">% of staff reporting phishing simulations vs. clicking.</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-6 bg-white">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-4">Security Engagement Index (SEI)</h4>
+                    <p class="text-sm text-slate-500 mb-6">Current adoption vs. 100% Target (Required for ISO 27001 Audit).</p>
+                    <div class="chart-container h-80">
+                        <canvas id="iesChart"></canvas>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center text-sm bg-blue-50 p-3 rounded text-blue-800 border border-blue-100">
+                        <span><strong>Action Required:</strong> Link critical system access to annual training completion (Zero Trust model).</span>
+                        <button onclick="alert('Notification campaign triggered for pending employees.')" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">Remind Staff</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Operational -->
+            <section id="operational" class="scroll-mt-24">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 inline-block">&#9881; 3. Operational Level (IT/SecOps)</h3>
+                </div>
+                <p class="text-slate-600 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    Granular metrics that feed the strategic and tactical levels. We focus on technical endpoint immunity, patching agility for known vulnerabilities, and monitoring sensitive data to maintain compliance with LGPD/GDPR requirements via Google Workspace DLP.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 rounded-xl flex flex-col justify-between bg-white">
+                        <div>
+                            <h4 class="font-semibold text-slate-700">Malware Immunity</h4>
+                            <p class="text-3xl font-bold text-slate-800">99.2%</p>
+                            <p class="text-xs text-slate-500 mt-1">Target: &gt; 99%</p>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 99.2%"></div>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2">Formula: 1 - (Infected / Total Assets)</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-xl flex flex-col justify-between bg-white">
+                        <div>
+                            <h4 class="font-semibold text-slate-700">Patching Effectiveness</h4>
+                            <p class="text-3xl font-bold text-slate-800">92%</p>
+                            <p class="text-xs text-slate-500 mt-1">Servers (95% Target) | Endpoints (90%)</p>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-yellow-500 h-2 rounded-full" style="width: 92%"></div>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2">Critical patches applied &lt; 48h</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-xl flex flex-col justify-between bg-white">
+                        <div>
+                            <h4 class="font-semibold text-slate-700">DLP Blocks (Monthly)</h4>
+                            <p class="text-3xl font-bold text-red-600">14</p>
+                            <p class="text-xs text-slate-500 mt-1">Incidents Prevented</p>
+                        </div>
+                        <div class="mt-4 pt-2 border-t border-slate-100">
+                            <p class="text-xs text-slate-600">External shares blocked containing PII (Google Workspace).</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Risk Matrix -->
+            <section id="riscos" class="scroll-mt-24">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 inline-block">&#9888; 4. Inventory & Risk Matrix</h3>
+                </div>
+                <p class="text-slate-600 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    Interactive visualization based on the "Korn Risk Matrix V7.0". The chart correlates <strong>Impact (X)</strong> and <strong>Probability (Y)</strong> of mapped risks. Bubble size represents the calculated Risk Degree. Hover over points for mitigation and contingency details.
+                </p>
+
+                <div class="glass-card rounded-xl p-6 bg-white">
+                    <div class="chart-container h-96">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-slate-600" id="risk-details-panel">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded text-center col-span-3">
+                            Hover over a bubble in the matrix to view specific mitigation and contingency plans.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Action Plan -->
+            <section id="action-plan" class="scroll-mt-24">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 inline-block">&#128640; 5. 2025 Implementation Roadmap</h3>
+                </div>
+                <p class="text-slate-600 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    To consolidate current maturity and align Korn Translations with a <em>Zero Trust</em> architecture, our governance timeline is divided into three progressive phases, followed by 2025's high-priority strategic directives.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="glass-card p-6 rounded-xl border-t-4 border-slate-400 bg-white">
+                        <h4 class="font-bold text-slate-800 mb-2 flex justify-between items-center">
+                            <span>Phase 1: Integration</span>
+                            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">Monthly</span>
+                        </h4>
+                        <ul class="text-sm text-slate-600 space-y-2 mt-4">
+                            <li><strong>Automation:</strong> Weekly DLP reports and Wizer metric integration.</li>
+                            <li><strong>Inventory:</strong> Real-time asset mapping updates for better ISMI calculation.</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl border-t-4 border-blue-400 bg-white">
+                        <h4 class="font-bold text-slate-800 mb-2 flex justify-between items-center">
+                            <span>Phase 2: Management Review</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Quarterly</span>
+                        </h4>
+                        <ul class="text-sm text-slate-600 space-y-2 mt-4">
+                            <li><strong>Review:</strong> ISO 27001 Item 9.3 Management Reviews.</li>
+                            <li><strong>Assessment:</strong> Re-evaluating risks showing increased severity in the matrix.</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl border-t-4 border-green-400 bg-white">
+                        <h4 class="font-bold text-slate-800 mb-2 flex justify-between items-center">
+                            <span>Phase 3: Continuous Improvement</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Continuous</span>
+                        </h4>
+                        <ul class="text-sm text-slate-600 space-y-2 mt-4">
+                            <li><strong>Training:</strong> Triggered campaigns if Engagement Index (SEI) drops below 90%.</li>
+                            <li><strong>Resilience:</strong> Review Contingency Plans (C001-C017) if MTTR lags.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl bg-slate-900 text-white">
+                    <h4 class="text-xl font-bold mb-6 text-blue-300">2025 Strategic Directives (Zero Trust Framework)</h4>
+                    <div class="space-y-3">
+                        <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                            <p class="font-bold text-blue-400 mb-1">1. Mandatory Universal MFA</p>
+                            <p class="text-sm text-slate-300">Enforce Multi-Factor Authentication for 100% of accounts. VPN, AWS, and Google Workspace must require MFA, establishing Identity as the new perimeter.</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                            <p class="font-bold text-blue-400 mb-1">2. Network & Data Micro-segmentation</p>
+                            <p class="text-sm text-slate-300">Restricting access to client data (Asset AI08) strictly to Project/Production roles via Role-Based Access Control (RBAC) and least-privilege principles.</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                            <p class="font-bold text-blue-400 mb-1">3. AI Homologation (Plan M027)</p>
+                            <p class="text-sm text-slate-300">Block unsanctioned public Generative AI tools. Standardize use of Enterprise/API-driven AI to prevent inadvertent data leakage during translation tasks.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
-
     </main>
-    <footer class="bg-white mt-16 border-t border-gray-200">
-        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
-            <p>&copy; 2025 CISO Security Analysis. Content generated for strategic evaluation purposes.</p>
-        </div>
-    </footer>
 
     <script>
-        const securityData = {
-            overview: {
-                labels: ["IAM", "Data Protection", "Threat Protection", "Governance & Compliance", "Endpoint Management"],
-                zoho: {
-                    label: 'Zoho One',
-                    scores: [3, 3, 2, 3, 3],
-                    borderColor: 'rgb(250, 83, 70)',
-                    backgroundColor: 'rgba(250, 83, 70, 0.2)',
-                },
-                google: {
-                    label: 'Google Workspace',
-                    scores: [4, 4, 4, 4, 4],
-                    borderColor: 'rgb(52, 168, 83)',
-                    backgroundColor: 'rgba(52, 168, 83, 0.2)',
-                },
-                m365: {
-                    label: 'Microsoft 365',
-                    scores: [5, 5, 5, 5, 5],
-                    borderColor: 'rgb(66, 133, 244)',
-                    backgroundColor: 'rgba(66, 133, 244, 0.2)',
-                }
-            },
-            sections: [
-                {
-                    id: 'iam',
-                    title: 'Identity and Access Management (IAM)',
-                    description: 'The foundation of any Zero Trust security strategy. IAM ensures that only authorized users access the appropriate resources, at the right time, and for the right reason. We evaluate the robustness of authentication, authorization, and provisioning controls.',
-                    platforms: {
-                        zoho: {
-                            title: 'Zoho One',
-                            rating: 3,
-                            features: [
-                                { name: 'Multi-Factor Authentication (MFA)', description: 'Support for TOTP, push notifications (OneAuth), YubiKey. Solid for most use cases.' },
-                                { name: 'Single Sign-On (SSO)', description: 'Acts as both an Identity Provider (IdP) and Service Provider (SP) via SAML and OpenID.' },
-                                { name: 'Password Policies', description: 'Granular controls for complexity, expiration, and history.' },
-                                { name: 'Conditional Access', description: 'Basic, primarily based on IP restrictions. Less granular than competitors.' },
-                            ]
-                        },
-                        google: {
-                            title: 'Google Workspace',
-                            rating: 4,
-                            features: [
-                                { name: 'Multi-Factor Authentication (MFA)', description: 'Broad support, including Google Prompt, FIDO/Titan security keys, and TOTP.' },
-                                { name: 'Single Sign-On (SSO)', description: 'Robust configuration as IdP and SP for thousands of pre-integrated apps.' },
-                                { name: 'Context-Aware Access', description: 'Conditional access policies based on user, location, device status, and IP.' },
-                                { name: 'BeyondCorp Enterprise', description: 'Advanced Zero Trust implementation, moving access away from the traditional VPN (requires higher plan).' },
-                            ]
-                        },
-                        m365: {
-                            title: 'Microsoft 365',
-                            rating: 5,
-                            features: [
-                                { name: 'Azure Active Directory (Entra ID)', description: 'Market leader in IAM. Extensive MFA support, including FIDO2 passwordless.' },
-                                { name: 'Conditional Access', description: 'Extremely granular, with policies based on real-time risk, device, application, and location.' },
-                                { name: 'Identity Protection', description: 'AI-based identity risk detection to automate remediation of compromised accounts.' },
-                                { name: 'Privileged Identity Management (PIM)', description: 'Just-in-time controls for administrative role access, minimizing risk.' },
-                            ]
-                        }
-                    }
-                },
-                {
-                    id: 'data-protection',
-                    title: 'Data Protection and Loss Prevention (DLP)',
-                    description: 'Protecting data wherever it resides is crucial. We analyze the features for encryption, data classification, and DLP policies that prevent the exfiltration of sensitive information, both accidental and malicious.',
-                    platforms: {
-                        zoho: {
-                            title: 'Zoho One',
-                            rating: 3,
-                            features: [
-                                { name: 'Encryption at Rest and in Transit', description: 'Industry standard (AES-256 and TLS). Email encryption via S/MIME and Zoho\'s SecurePass.' },
-                                { name: 'DLP Policies', description: 'Available in email (Mail) and on the desktop (Endpoint Central). Rules based on predefined and custom content.' },
-                                { name: 'Email Retention', description: 'Retention policies and eDiscovery available in Zoho Mail.' },
-                                { name: 'Rights Management', description: 'Granular permission controls at the application level (e.g., WorkDrive), but without a unified Information Rights Management (IRM) framework.' },
-                            ]
-                        },
-                        google: {
-                            title: 'Google Workspace',
-                            rating: 4,
-                            features: [
-                                { name: 'Encryption', description: 'Encryption at rest and in transit by default. Client-side encryption (CSE) available for full control of keys.' },
-                                { name: 'Data Loss Prevention (DLP)', description: 'DLP for Drive, Gmail, and Chat with predefined and custom content detectors. Rules based on OCR for images.' },
-                                { name: 'Google Vault', description: 'eDiscovery and retention for all Workspace data, including complex searches and legal holds.' },
-                                { name: 'Confidentiality Labels', description: 'Manual and automated data classification for files in Drive (in development, less mature than M365).' },
-                            ]
-                        },
-                        m365: {
-                            title: 'Microsoft 365',
-                            rating: 5,
-                            features: [
-                                { name: 'Microsoft Purview Information Protection', description: 'Unified framework for data classification, labeling, and protection (encryption and access restrictions).' },
-                                { name: 'Data Loss Prevention (DLP)', description: 'Unified DLP across endpoints, apps, and cloud services (SharePoint, Exchange, Teams). Highly customizable.' },
-                                { name: 'eDiscovery & Audit', description: 'Purview eDiscovery (Premium) offers an end-to-end workflow for investigations, including advanced analytics.' },
-                                { name: 'Double Key Encryption (DKE)', description: 'For highly sensitive scenarios where Microsoft does not have access to the encryption keys.' },
-                            ]
-                        }
-                    }
-                },
-                {
-                    id: 'threat-protection',
-                    title: 'Advanced Threat Protection',
-                    description: 'Traditional defenses are insufficient against modern threats. This section evaluates the capabilities for detecting and responding to phishing, malware, ransomware, and targeted attacks, including sandboxing and behavioral analysis.',
-                    platforms: {
-                        zoho: {
-                            title: 'Zoho One',
-                            rating: 2,
-                            features: [
-                                { name: 'Email Protection', description: 'Anti-spam and anti-virus filters. SPF, DKIM, DMARC. Basic protection, without sandboxing for attachments or URLs.' },
-                                { name: 'Endpoint Security', description: 'Through Endpoint Central (MDM), it offers patch management, application control, and basic antivirus.' },
-                                { name: 'SIEM', description: 'Integration with Zoho Log360 (a separate product from the same ecosystem) for security analysis.' },
-                                { name: 'Threat Visibility', description: 'Limited natively within One. Depends on integrations or additional products for an XDR posture.' },
-                            ]
-                        },
-                        google: {
-                            title: 'Google Workspace',
-                            rating: 4,
-                            features: [
-                                { name: 'Advanced Phishing and Malware Protection', description: 'Robust machine learning for threat detection in Gmail. Sandboxing of attachments.' },
-                                { name: 'URL Protection', description: 'Click-time verification for URLs in emails and chat.' },
-                                { name: 'Alert and Investigation Center', description: 'Centralized dashboard for security alerts and a tool for in-depth event investigations.' },
-                                { name: 'Chronicle Integration', description: 'Can be integrated with Google Chronicle (SIEM/SOAR platform) for large-scale telemetry analysis.' },
-                            ]
-                        },
-                        m365: {
-                            title: 'Microsoft 365',
-                            rating: 5,
-                            features: [
-                                { name: 'Microsoft Defender for Office 365', description: 'Leading protection for email and collaboration. Safe Attachments (sandbox), Safe Links (URL rewrite), and advanced anti-phishing.' },
-                                { name: 'Microsoft Defender for Endpoint', description: 'Market-leading EDR/XDR platform for device protection, with Threat & Vulnerability Management.' },
-                                { name: 'Microsoft Sentinel', description: 'Native cloud SIEM and SOAR, deeply integrated with the entire Microsoft ecosystem for end-to-end visibility and automation.' },
-                                { name: 'Attack Simulation', description: 'Integrated tool to train users against phishing and other threats, with detailed reports.' },
-                            ]
-                        }
-                    }
-                },
-                {
-                    id: 'governance',
-                    title: 'Governance, Risk, and Compliance (GRC)',
-                    description: 'Maintaining compliance with regulations like GDPR, LGPD, and HIPAA is imperative. We evaluate the audit tools, compliance dashboards, and certifications each platform offers to simplify and demonstrate adherence to standards.',
-                    platforms: {
-                        zoho: {
-                            title: 'Zoho One',
-                            rating: 3,
-                            features: [
-                                { name: 'Audit Trails', description: 'Detailed audit logs available in most critical applications.' },
-                                { name: 'Certifications', description: 'Holds important certifications like ISO 27001, SOC 2 Type II, and compliance with GDPR and HIPAA.' },
-                                { name: 'Data Residency', description: 'Allows choosing the data center region (e.g., US, EU, India) at the time of signup.' },
-                                { name: 'Compliance Dashboard', description: 'Less centralized than competitors. Compliance management is distributed among the admin panels of the apps.' },
-                            ]
-                        },
-                        google: {
-                            title: 'Google Workspace',
-                            rating: 4,
-                            features: [
-                                { name: 'Security Dashboard', description: 'Provides an overview of the security posture, insights, and recommendations.' },
-                                { name: 'Certifications and Compliance', description: 'Wide range of global and regional certifications. Tools to assist with GDPR, HIPAA, etc.' },
-                                { name: 'Data Regions', description: 'Granular controls to choose where specific users\' covered data is stored at rest.' },
-                                { name: 'Access Transparency', description: 'Detailed logs of when Google staff access customer data (usually for support).' },
-                            ]
-                        },
-                        m365: {
-                            title: 'Microsoft 365',
-                            rating: 5,
-                            features: [
-                                { name: 'Microsoft Purview Compliance Portal', description: 'Centralized hub for managing compliance. Includes Compliance Manager that maps controls to regulations.' },
-                                { name: 'Extensive Certifications', description: 'The most comprehensive compliance portfolio on the market, covering dozens of global and industry standards.' },
-                                { name: 'Advanced Audit', description: 'Long-term forensic audit logs and insights into high-risk activities.' },
-                                { name: 'Data Residency and Multi-Geo', description: 'Advanced options for data residency by user or SharePoint site, to meet data sovereignty requirements.' },
-                            ]
-                        }
-                    }
-                }
-            ]
-        };
-
-        function renderRating(rating) {
-            let stars = '';
-            for (let i = 0; i < 5; i++) {
-                if (i < rating) {
-                    stars += `<span class="text-amber-500">&#9733;</span>`;
-                } else {
-                    stars += `<span class="text-gray-300">&#9733;</span>`;
-                }
-            }
-            return stars;
-        }
-
-        function createComparisonSection(sectionData) {
-            const sectionEl = document.createElement('section');
-            sectionEl.id = sectionData.id;
-            sectionEl.className = 'mb-16';
-
-            let content = `
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">${sectionData.title}</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">${sectionData.description}</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            `;
-
-            for (const platformKey in sectionData.platforms) {
-                const platform = sectionData.platforms[platformKey];
-                content += `
-                    <div class="card rounded-xl shadow-lg p-6 flex flex-col">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-semibold text-gray-800">${platform.title}</h3>
-                            <div class="text-lg">${renderRating(platform.rating)}</div>
-                        </div>
-                        <ul class="space-y-4 text-gray-600 flex-grow">
-                `;
-                platform.features.forEach(feature => {
-                    content += `
-                        <li class="flex items-start">
-                            <span class="mr-3 text-emerald-500 mt-1">&#10003;</span>
-                            <div>
-                                <strong class="font-medium text-gray-700">${feature.name}:</strong> ${feature.description}
-                            </div>
-                        </li>
-                    `;
-                });
-                content += `</ul></div>`;
-            }
-            content += `</div>`;
-            sectionEl.innerHTML = content;
-            return sectionEl;
-        }
-
+        // Update Date
+        const dateElement = document.getElementById('current-date');
+        dateElement.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
         document.addEventListener('DOMContentLoaded', () => {
-            const ctx = document.getElementById('securityRadarChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'radar',
+            initDashboard();
+            setupNavSpy();
+        });
+
+        function setupNavSpy() {
+            const sections = document.querySelectorAll('section');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (scrollY >= (sectionTop - 150)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href').includes(current)) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        function initDashboard() {
+            // Chart 1: ISMI Doughnut
+            new Chart(document.getElementById('icmsChart').getContext('2d'), {
+                type: 'doughnut',
                 data: {
-                    labels: securityData.overview.labels,
+                    labels: ['Maturity Achieved', 'Improvement Gap'],
+                    datasets: [{
+                        data: [76, 24],
+                        backgroundColor: ['#2563eb', '#e2e8f0'],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    rotation: -90,
+                    circumference: 180,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Chart 2: SEI Bar Chart
+            new Chart(document.getElementById('iesChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Phishing (Wizer)', 'Policy Acceptance', 'Endpoint Hardening', 'Security Awareness'],
                     datasets: [
-                        {
-                            label: securityData.overview.zoho.label,
-                            data: securityData.overview.zoho.scores,
-                            borderColor: securityData.overview.zoho.borderColor,
-                            backgroundColor: securityData.overview.zoho.backgroundColor,
-                            borderWidth: 2,
-                            pointBackgroundColor: securityData.overview.zoho.borderColor,
-                            pointRadius: 4,
-                        },
-                        {
-                            label: securityData.overview.google.label,
-                            data: securityData.overview.google.scores,
-                            borderColor: securityData.overview.google.borderColor,
-                            backgroundColor: securityData.overview.google.backgroundColor,
-                            borderWidth: 2,
-                            pointBackgroundColor: securityData.overview.google.borderColor,
-                            pointRadius: 4,
-                        },
-                        {
-                            label: securityData.overview.m365.label,
-                            data: securityData.overview.m365.scores,
-                            borderColor: securityData.overview.m365.borderColor,
-                            backgroundColor: securityData.overview.m365.backgroundColor,
-                            borderWidth: 2,
-                            pointBackgroundColor: securityData.overview.m365.borderColor,
-                            pointRadius: 4,
-                        }
+                        { label: 'Current (%)', data: [88, 95, 92, 85], backgroundColor: '#3b82f6', borderRadius: 4 },
+                        { label: 'Target (%)', data: [100, 100, 95, 100], backgroundColor: '#cbd5e1', borderRadius: 4 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100 } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Chart 3: Risk Bubble Matrix
+            const risks = [
+                { id: 'AI01', name: 'Physical Docs', prob: 1, impact: 1, degree: 1, mitigation: 'Locked cabinets (M001)', contingency: 'B.O./Police Report (C001)', color: '#10b981' },
+                { id: 'AI08', name: 'Digital Client Docs', prob: 2, impact: 3, degree: 4, mitigation: 'AI Homologation (M027)', contingency: 'DPO/Data Authority Alert (C014)', color: '#ef4444' },
+                { id: 'ASV12', name: 'Office Facility', prob: 1, impact: 3, degree: 1, mitigation: 'UPS/Generator', contingency: 'Remote Work (C015)', color: '#f59e0b' },
+                { id: 'ASW10', name: 'Integration Platform', prob: 2, impact: 2, degree: 3, mitigation: 'Scenario Backups (M024)', contingency: 'Manual Process (C016)', color: '#f59e0b' }
+            ];
+
+            const riskChart = new Chart(document.getElementById('riskChart').getContext('2d'), {
+                type: 'bubble',
+                data: {
+                    datasets: risks.map(r => ({
+                        label: r.id,
+                        data: [{ x: r.impact, y: r.prob, r: r.degree * 8 }],
+                        backgroundColor: r.color + '99',
+                        borderColor: r.color,
+                        borderWidth: 2,
+                        riskMeta: r
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        r: {
-                            angleLines: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            pointLabels: {
-                                font: {
-                                    size: 13,
-                                    weight: '500'
-                                },
-                                color: '#3D3B30'
-                            },
-                            ticks: {
-                                beginAtZero: true,
-                                max: 5,
-                                stepSize: 1,
-                                backdropColor: 'rgba(255, 255, 255, 0.75)'
-                            }
+                        x: { title: { display: true, text: 'Impact (1: Limited -> 3: Catastrophic)' }, min: 0.5, max: 3.5, ticks: { stepSize: 1 } },
+                        y: { title: { display: true, text: 'Probability (1: Low -> 3: High)' }, min: 0.5, max: 3.5, ticks: { stepSize: 1 } }
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (ctx) => `${ctx.dataset.riskMeta.id}: Risk Degree ${ctx.dataset.riskMeta.degree}` }
                         }
                     },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 14,
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.r !== null) {
-                                        label += context.parsed.r + ' / 5';
-                                    }
-                                    return label;
-                                }
-                            }
+                    onHover: (e, el) => {
+                        e.native.target.style.cursor = el[0] ? 'pointer' : 'default';
+                        if(el[0]) {
+                            const meta = riskChart.data.datasets[el[0].datasetIndex].riskMeta;
+                            document.getElementById('risk-details-panel').innerHTML = `
+                                <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                                    <span class="block font-bold">${meta.id}: ${meta.name}</span>
+                                </div>
+                                <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                                    <span class="block font-bold">Mitigation</span>
+                                    <span class="block text-xs mt-1">${meta.mitigation}</span>
+                                </div>
+                                <div class="p-4 bg-orange-50 border-l-4 border-orange-500 rounded">
+                                    <span class="block font-bold">Contingency</span>
+                                    <span class="block text-xs mt-1">${meta.contingency}</span>
+                                </div>
+                            `;
                         }
                     }
                 }
             });
-
-            const comparisonContainer = document.getElementById('comparison-sections');
-            securityData.sections.forEach(section => {
-                const sectionNode = createComparisonSection(section);
-                comparisonContainer.appendChild(sectionNode);
-            });
-
-            const navLinks = document.querySelectorAll('.nav-link');
-            const sections = document.querySelectorAll('section');
-
-            const observerOptions = {
-                root: null,
-                rootMargin: '-80px 0px -50% 0px',
-                threshold: 0
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        navLinks.forEach(link => {
-                            link.classList.remove('active');
-                            if (link.getAttribute('href').substring(1) === entry.target.id) {
-                                link.classList.add('active');
-                            }
-                        });
-                    }
-                });
-            }, observerOptions);
-
-            sections.forEach(section => {
-                observer.observe(section);
-            });
-            
-             if (navLinks.length > 0) {
-                navLinks[0].classList.add('active');
-            }
-
-        });
+        }
     </script>
+</body>
+</html>
 
 </body>
 </html>
